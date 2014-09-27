@@ -1,85 +1,83 @@
 (ns puglj.core
   (:require [clojure.set :as s]))
 
-(def valid-classes #{:scout :soldier :pyro
-              :demoman :heavy :engineer
-              :sniper :medic :spy})
+(def valid-classes #{:scout :soldier :pyro :demoman :heavy :engineer :sniper :medic :spy})
 
 (defn- clean-empty
-  [state]
-  (reduce (fn [state cls]
-            (if (= 0 (count (get-in state [:classes cls])))
-              (update-in state [:classes] dissoc cls)
-              state))
-    state valid-classes))
+  [classes]
+  (reduce (fn [classes cls]
+            (if (= 0 (count (get classes cls)))
+              (dissoc classes cls)
+              classes))
+    classes valid-classes))
 
 (defn- remove-player-from-class
-  [state nick class]
-  (if (contains? (:classes state) class)
-    (update-in state [:classes class] disj nick)
-    state))
+  [classes nick class]
+  (if (contains? classes class)
+    (update-in classes [class] disj nick)
+    classes))
 
 (defn remove-player
   "Removes a player from the pug"
-  [state nick]
+  [classes nick]
   (clean-empty
-    (reduce (fn [state cls]
-              (remove-player-from-class state nick cls))
-      state valid-classes)))
+    (reduce (fn [classes cls]
+              (remove-player-from-class classes nick cls))
+      classes valid-classes)))
 
 (defn- add-player-to-class
-  [state nick class]
-  (if (contains? (:classes state) class)
-    (update-in state [:classes class] conj nick)
-    (update-in state [:classes] assoc class #{nick})))
+  [classes nick class]
+  (if (contains? classes class)
+    (update-in classes [class] conj nick)
+    (assoc classes class #{nick})))
 
 (defn add-player
   "Adds a player to the pug"
-  [state nick classes]
-  (assert (= 0 (count (s/difference classes valid-classes))))
-  (reduce (fn [state cls]
-            (add-player-to-class state nick cls))
-    (remove-player state nick) classes))
+  [classes nick classes-to-add]
+  (assert (= 0 (count (s/difference classes-to-add valid-classes))))
+  (reduce (fn [classes cls]
+            (add-player-to-class classes nick cls))
+    (remove-player classes nick) classes-to-add))
 
 (defn- rename-player-in-class
-  [state class old-nick new-nick]
-  (if (contains? (get-in state [:classes class] #{}) old-nick)
-    (add-player-to-class (remove-player-from-class state old-nick class) new-nick class)
-    state))
+  [classes class old-nick new-nick]
+  (if (contains? (get classes class #{}) old-nick)
+    (add-player-to-class (remove-player-from-class classes old-nick class) new-nick class)
+    classes))
 
 (defn rename-player
   "Renames a player in the pug"
-  [state old-nick new-nick]
-  (reduce (fn [state cls]
-            (rename-player-in-class state cls old-nick new-nick)) state valid-classes))
+  [classes old-nick new-nick]
+  (reduce (fn [classes cls]
+            (rename-player-in-class classes cls old-nick new-nick)) classes valid-classes))
 
 (defn- count-classes
-  [state]
-  (map #(count (get-in state [:classes %] #{})) valid-classes))
+  [classes]
+  (map #(count (get-in classes [%] #{})) valid-classes))
 
 (defn- mapunion
   [f & colls]
   (apply s/union (apply map f colls)))
 
 (defn- get-dupes
-  [state class]
-  (s/intersection (get-in state [:classes class])
-    (mapunion #(get-in state [:classes %]) (disj valid-classes class))))
+  [classes class]
+  (s/intersection (get classes class)
+    (mapunion #(get classes %) (disj valid-classes class))))
 
 (defn- remove-duplicate-names-from-class
-  [state class]
-  (if-let [dupes (get-dupes state class)]
-    (reduce (fn [state nick]
-              (remove-player-from-class state nick class))
-      state dupes)
-    state))
+  [classes class]
+  (if-let [dupes (get-dupes classes class)]
+    (reduce (fn [classes nick]
+              (remove-player-from-class classes nick class))
+      classes dupes)
+    classes))
 
 (defn- remove-duplicate-names
-  [state]
-  (reduce remove-duplicate-names-from-class state valid-classes))
+  [classes]
+  (reduce remove-duplicate-names-from-class classes valid-classes))
 
 (defn ready?
   "Returns true if a pug is ready, else false"
-  [state]
-  (and (every? (partial <= 2) (count-classes (remove-duplicate-names state)))
-    (<= 18 (count (mapunion #(get-in state [:classes %]) valid-classes)))))
+  [classes]
+  (and (every? (partial <= 2) (count-classes (remove-duplicate-names classes)))
+    (<= 18 (count (mapunion #(get classes %) valid-classes)))))
