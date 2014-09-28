@@ -49,7 +49,8 @@
   "Renames a player in the pug"
   [classes old-nick new-nick]
   (reduce (fn [classes cls]
-            (rename-player-in-class classes cls old-nick new-nick)) classes valid-classes))
+            (rename-player-in-class classes cls old-nick new-nick))
+    classes valid-classes))
 
 (defn- count-classes
   [classes]
@@ -81,8 +82,7 @@
   [classes]
   (mapunion #(get classes %) valid-classes))
 
-(defn need
-  "Returns a map of unmet requirements"
+(defn- class-need
   [classes]
   (reduce (fn [reqs cls]
             (let [num (max 0 (- 2 (count (get classes cls #{}))))]
@@ -90,6 +90,24 @@
                 (assoc reqs cls num)
                 reqs)))
     {} valid-classes))
+
+(defn- classes-for-player
+  [classes nick]
+  (set (map first (filter #(contains? (last %) nick) classes))))
+
+(defn- dupes-need
+  [classes]
+  (reduce (fn [reqs nick]
+            (let [cfp (classes-for-player classes nick)]
+              (if (<= 2 (count cfp))
+                (merge-with + reqs {cfp 1})
+                reqs)))
+  {} (players classes)))
+
+(defn need
+  "Returns a map of unmet requirements"
+  [classes]
+  (merge (class-need classes) (dupes-need classes)))
 
 (defn ready?
   "Returns true if a pug is ready, else false"
