@@ -151,3 +151,27 @@
                                                   :medic #{"m" "n"}
                                                   :sniper #{"o" "p"}
                                                   :spy #{"q" "r" "s" "t"}})))))
+
+(deftest need-with-dupe-and-extra-player-test
+  (testing "Need handles duplicates correctly"
+    (is (= {} (need ["a" "b"] {:scout #{"a" "b" "c"}
+                               :soldier #{"a" "d"}
+                               :pyro #{"e" "f"}
+                               :demoman #{"g" "h"}
+                               :heavy #{"i" "j"}
+                               :engineer #{"k" "l"}
+                               :medic #{"m" "n"}
+                               :sniper #{"o" "p"}
+                               :spy #{"q" "r" "s" "t"}})))))
+
+(deftest need-with-optional-dupe-and-dupe-test
+  (testing "Need handles multiple duplicates correctly"
+    (is (= {#{:soldier :pyro} 1} (need ["a" "b"] {:scout #{"a" "b" "c"}
+                                                  :soldier #{"a" "d"}
+                                                  :pyro #{"d" "f"}
+                                                  :demoman #{"g" "h"}
+                                                  :heavy #{"i" "j"}
+                                                  :engineer #{"k" "l"}
+                                                  :medic #{"m" "n"}
+                                                  :sniper #{"o" "p"}
+                                                  :spy #{"q" "r" "s" "t"}})))))

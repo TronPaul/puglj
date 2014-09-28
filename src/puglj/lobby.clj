@@ -53,8 +53,10 @@
     classes valid-classes))
 
 (defn- count-classes
-  [classes]
-  (map #(count (get classes % #{})) valid-classes))
+  ([classes]
+    (count-classes classes valid-classes))
+  ([classes classes-to-count]
+    (map #(count (get classes % #{})) classes-to-count)))
 
 (defn- mapunion
   [f & colls]
@@ -99,7 +101,8 @@
   [classes]
   (reduce (fn [reqs nick]
             (let [cfp (classes-for-player classes nick)]
-              (if (<= 2 (count cfp))
+              (if (and (<= 2 (count cfp))
+                    (every? #(>= 2 %) (count-classes classes cfp)))
                 (merge-with + reqs {cfp 1})
                 reqs)))
   {} (players classes)))
