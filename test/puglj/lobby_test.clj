@@ -116,10 +116,23 @@
                      :spy #{"q" "r"}})))))
 
 (deftest need-with-dupes-test
-  (testing "Need handles duplicates approriately"
+  (testing "Need handles duplicates correctly"
     (is (= {#{:scout :soldier} 1} (need {:scout #{"a" "b"}
+                                         :soldier #{"a" "d"}
+                                         :pyro #{"e" "f"}
+                                         :demoman #{"g" "h"}
+                                         :heavy #{"i" "j"}
+                                         :engineer #{"k" "l"}
+                                         :medic #{"m" "n"}
+                                         :sniper #{"o" "p"}
+                                         :spy #{"q" "r" "s" "t"}})))))
+
+(deftest need-with-mulitple-dupes-test
+  (testing "Need handles multiple duplicates correctly"
+    (is (= {#{:scout :soldier} 1
+            #{:soldier :pyro} 1} (need {:scout #{"a" "b"}
                                         :soldier #{"a" "d"}
-                                        :pyro #{"e" "f"}
+                                        :pyro #{"d" "f"}
                                         :demoman #{"g" "h"}
                                         :heavy #{"i" "j"}
                                         :engineer #{"k" "l"}
