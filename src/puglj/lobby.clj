@@ -53,7 +53,7 @@
 
 (defn- count-classes
   [classes]
-  (map #(count (get-in classes [%] #{})) valid-classes))
+  (map #(count (get classes % #{})) valid-classes))
 
 (defn- mapunion
   [f & colls]
@@ -80,6 +80,16 @@
   "Returns a set of all players"
   [classes]
   (mapunion #(get classes %) valid-classes))
+
+(defn need
+  "Returns a map of unmet requirements"
+  [classes]
+  (reduce (fn [reqs cls]
+            (let [num (max 0 (- 2 (count (get classes cls #{}))))]
+              (if (< 0 num)
+                (assoc reqs cls num)
+                reqs)))
+    {} valid-classes))
 
 (defn ready?
   "Returns true if a pug is ready, else false"

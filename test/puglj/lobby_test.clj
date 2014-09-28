@@ -90,3 +90,39 @@
                       :medic #{"m" "n"}
                       :sniper #{"o" "p"}
                       :spy #{"q" "r" "s" "t"}})))))
+
+(deftest need-test
+  (testing "Need returns list requirements unmet to be ready"
+    (is (= {:scout 2
+            :soldier 2
+            :pyro 2
+            :demoman 2
+            :heavy 2
+            :engineer 2
+            :medic 2
+            :sniper 2
+            :spy 2} (need {})))))
+
+(deftest need-ready-test
+  (testing "Need returns an empty map if all requirements are met"
+    (is (= {} (need {:scout #{"a" "b"}
+                     :soldier #{"c" "d"}
+                     :pyro #{"e" "f"}
+                     :demoman #{"g" "h"}
+                     :heavy #{"i" "j"}
+                     :engineer #{"k" "l"}
+                     :medic #{"m" "n"}
+                     :sniper #{"o" "p"}
+                     :spy #{"q" "r"}})))))
+
+(deftest need-with-dupes-test
+  (testing "Need handles duplicates approriately"
+    (is (= {#{:scout :soldier} 1} (need {:scout #{"a" "b"}
+                                        :soldier #{"a" "d"}
+                                        :pyro #{"e" "f"}
+                                        :demoman #{"g" "h"}
+                                        :heavy #{"i" "j"}
+                                        :engineer #{"k" "l"}
+                                        :medic #{"m" "n"}
+                                        :sniper #{"o" "p"}
+                                        :spy #{"q" "r" "s" "t"}})))))
