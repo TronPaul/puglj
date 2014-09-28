@@ -1,6 +1,13 @@
 (ns puglj.game
   (:require [puglj.lobby :as lobby]))
 
+(defn pick-captains
+  "Pick the two captains"
+  [captains]
+  (assert (<= 2 (count captains)))
+  (reduce (fn [chosen _]
+            (conj chosen (rand-nth (apply disj (set captains) (set chosen))))) [] (range 2)))
+
 (defn- add-player-to-team
   [teams team nick class]
   (assoc teams team (assoc (nth teams team) class nick)))

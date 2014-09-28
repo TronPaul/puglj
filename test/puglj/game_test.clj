@@ -14,6 +14,17 @@
            :sniper #{"o" "p"}
            :spy #{"q" "r"}})
 
+(deftest pick-captain-test
+  (testing "Can pick two captains"
+    (is (= #{"a" "b"} (set (pick-captains ["a" "b"]))))))
+
+(deftest pick-captain-test
+  (testing "Can pick no more than two captains"
+    (with-redefs [rand-nth (fn [coll] (first coll))]
+      (is (= #{"a" "b"} (set (pick-captains ["a" "b" "c"])))))))
+
+;todo pick medic/demo captains over others?
+
 (deftest pick-player-test
   (testing "Picking a player adds them to the team and removes them from the pool"
     (is (= {:pool (lobby/remove-player pool "a")

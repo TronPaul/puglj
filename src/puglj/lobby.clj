@@ -104,13 +104,20 @@
                 reqs)))
   {} (players classes)))
 
+(defn- captains-need
+  [captains]
+  (if (> 2 (count captains))
+    {:captain (- 2 (count captains))}
+    {}))
+
 (defn need
   "Returns a map of unmet requirements"
-  [classes]
-  (merge (class-need classes) (dupes-need classes)))
+  [captains classes]
+  (merge (captains-need captains) (class-need classes) (dupes-need classes)))
 
 (defn ready?
   "Returns true if a pug is ready, else false"
-  [classes]
+  [captains classes]
   (and (every? (partial <= 2) (count-classes (remove-duplicate-names classes)))
-    (<= 18 (count (players classes)))))
+    (<= 18 (count (players classes)))
+    (<= 2 (count captains))))
