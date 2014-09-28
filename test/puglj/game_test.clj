@@ -14,14 +14,18 @@
            :sniper #{"o" "p"}
            :spy #{"q" "r"}})
 
-(deftest pick-captain-test
+(deftest pick-captains-test
   (testing "Can pick two captains"
     (is (= #{"a" "b"} (set (pick-captains ["a" "b"]))))))
 
-(deftest pick-captain-test
+(deftest pick-captains-test
   (testing "Can pick no more than two captains"
     (with-redefs [rand-nth (fn [coll] (first coll))]
       (is (= #{"a" "b"} (set (pick-captains ["a" "b" "c"])))))))
+
+(deftest pick-captains-at-least-two-test
+  (testing "Pick captains with one captain throws an error"
+    (is (thrown? AssertionError (pick-captains ["a"])))))
 
 ;todo pick medic/demo captains over others?
 
