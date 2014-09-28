@@ -1,4 +1,4 @@
-(ns puglj.core
+(ns puglj.game
   (:require [puglj.lobby :as lobby]))
 
 (defn- add-player-to-team

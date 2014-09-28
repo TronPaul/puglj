@@ -1,7 +1,7 @@
-(ns puglj.core-test
+(ns puglj.game-test
   (:require [clojure.test :refer :all]
             [puglj.util :refer :all]
-            [puglj.core :refer :all]
+            [puglj.game :refer :all]
             [puglj.lobby :as lobby]))
 
 (def pool {:scout #{"a" "b"}

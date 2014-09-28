@@ -2,7 +2,6 @@
   (:require [clojure.test :refer :all]
             [puglj.lobby :refer :all]))
 
-
 (def nick "name")
 (def other-nick "guy")
 
