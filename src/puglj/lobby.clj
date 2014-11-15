@@ -12,44 +12,44 @@
     classes valid-classes))
 
 (defn- remove-player-from-class
-  [classes nick class]
+  [classes user-id class]
   (if (contains? classes class)
-    (update-in classes [class] disj nick)
+    (update-in classes [class] disj user-id)
     classes))
 
 (defn remove-player
   "Removes a player from the pug"
-  [classes nick]
+  [classes user-id]
   (clean-empty
     (reduce (fn [classes cls]
-              (remove-player-from-class classes nick cls))
+              (remove-player-from-class classes user-id cls))
       classes valid-classes)))
 
 (defn- add-player-to-class
-  [classes nick class]
+  [classes user-id class]
   (if (contains? classes class)
-    (update-in classes [class] conj nick)
-    (assoc classes class #{nick})))
+    (update-in classes [class] conj user-id)
+    (assoc classes class #{user-id})))
 
 (defn add-player
   "Adds a player to the pug"
-  [classes nick classes-to-add]
+  [classes user-id classes-to-add]
   (assert (= 0 (count (s/difference classes-to-add valid-classes))))
   (reduce (fn [classes cls]
-            (add-player-to-class classes nick cls))
-    (remove-player classes nick) classes-to-add))
+            (add-player-to-class classes user-id cls))
+    (remove-player classes user-id) classes-to-add))
 
 (defn- rename-player-in-class
-  [classes class old-nick new-nick]
-  (if (contains? (get classes class #{}) old-nick)
-    (add-player-to-class (remove-player-from-class classes old-nick class) new-nick class)
+  [classes class old-user-id new-user-id]
+  (if (contains? (get classes class #{}) old-user-id)
+    (add-player-to-class (remove-player-from-class classes old-user-id class) new-user-id class)
     classes))
 
 (defn rename-player
   "Renames a player in the pug"
-  [classes old-nick new-nick]
+  [classes old-user-id new-user-id]
   (reduce (fn [classes cls]
-            (rename-player-in-class classes cls old-nick new-nick))
+            (rename-player-in-class classes cls old-user-id new-user-id))
     classes valid-classes))
 
 (defn- count-classes
@@ -70,8 +70,8 @@
 (defn- remove-duplicate-names-from-class
   [classes class]
   (if-let [dupes (get-dupes classes class)]
-    (reduce (fn [classes nick]
-              (remove-player-from-class classes nick class))
+    (reduce (fn [classes user-id]
+              (remove-player-from-class classes user-id class))
       classes dupes)
     classes))
 
@@ -94,13 +94,13 @@
     {} valid-classes))
 
 (defn- classes-for-player
-  [classes nick]
-  (set (map first (filter #(contains? (last %) nick) classes))))
+  [classes user-id]
+  (set (map first (filter #(contains? (last %) user-id) classes))))
 
 (defn- dupes-need
   [classes]
-  (reduce (fn [reqs nick]
-            (let [cfp (classes-for-player classes nick)]
+  (reduce (fn [reqs user-id]
+            (let [cfp (classes-for-player classes user-id)]
               (if (and (<= 2 (count cfp))
                     (every? #(>= 2 %) (count-classes classes cfp)))
                 (merge-with + reqs {cfp 1})

@@ -2,105 +2,105 @@
   (:require [clojure.test :refer :all]
             [puglj.lobby :refer :all]))
 
-(def nick "name")
-(def other-nick "guy")
+(def user-id 1)
+(def other-user-id 2)
 
 (deftest add-player-test
   (testing "Add a player to the pug"
-    (is (= {:scout #{nick}} (add-player {} nick #{:scout})))))
+    (is (= {:scout #{user-id}} (add-player {} user-id #{:scout})))))
 
 (deftest add-player-with-multiple-classes-test
   (testing "Add a player with more than one class to the pug"
-    (is (= {:scout #{nick} :soldier #{nick}}
-          (add-player {} nick #{:scout :soldier})))))
+    (is (= {:scout #{user-id} :soldier #{user-id}}
+          (add-player {} user-id #{:scout :soldier})))))
 
 (deftest add-player-to-pug-with-bad-class-test
   (testing "Add a player with a bad class to the pug"
-    (is (thrown? AssertionError (add-player {} nick #{:abcd})))))
+    (is (thrown? AssertionError (add-player {} user-id #{:abcd})))))
 
 (deftest add-second-player-test
   (testing "Add a second player to the pug"
-    (is (= {:scout #{nick} :soldier #{other-nick}}
-          (add-player {:scout #{nick}} other-nick #{:soldier})))))
+    (is (= {:scout #{user-id} :soldier #{other-user-id}}
+          (add-player {:scout #{user-id}} other-user-id #{:soldier})))))
 
 (deftest add-player-twice-test
   (testing "Readding a player will clear their previous classes"
-    (is (= {:soldier #{nick}}
-          (add-player {:scout #{nick}} nick #{:soldier})))))
+    (is (= {:soldier #{user-id}}
+          (add-player {:scout #{user-id}} user-id #{:soldier})))))
 
 (deftest remove-player-test
   (testing "Remove a player from the pug"
     (is (= {}
-          (remove-player {:scout #{nick}} nick)))))
+          (remove-player {:scout #{user-id}} user-id)))))
 
 (deftest remove-player-in-multiple-classes
   (testing "Remove a player added as multiple classes from the pug"
     (is (= {}
-          (remove-player {:scout #{nick} :soldier #{nick}} nick)))))
+          (remove-player {:scout #{user-id} :soldier #{user-id}} user-id)))))
 
 (deftest remove-player-safe-test
   (testing "Remove a player from the pug doesn't affect other players"
-    (is (= {:scout #{other-nick}}
-          (remove-player {:scout #{nick other-nick}} nick)))))
+    (is (= {:scout #{other-user-id}}
+          (remove-player {:scout #{user-id other-user-id}} user-id)))))
 
 (deftest rename-player-test
   (testing "Rename a player in the pug"
-    (is (= {:scout #{other-nick}}
-          (rename-player {:scout #{nick}} nick other-nick)))))
+    (is (= {:scout #{other-user-id}}
+          (rename-player {:scout #{user-id}} user-id other-user-id)))))
 
 (deftest rename-player-safe
   (testing "Renaming a non-existent player doesn't affect other players"
-    (let [state {:scout #{nick}}]
-      (is (= state (rename-player state other-nick "querty"))))))
+    (let [state {:scout #{user-id}}]
+      (is (= state (rename-player state other-user-id "querty"))))))
 
 (deftest basic-ready-test
   (testing "A game is ready"
-    (is (ready? ["a" "b"] {:scout #{"a" "b"}
-                           :soldier #{"c" "d"}
-                           :pyro #{"e" "f"}
-                           :demoman #{"g" "h"}
-                           :heavy #{"i" "j"}
-                           :engineer #{"k" "l"}
-                           :medic #{"m" "n"}
-                           :sniper #{"o" "p"}
-                           :spy #{"q" "r"}}))))
+    (is (ready? [1 2] {:scout #{1 2}
+                           :soldier #{3 4}
+                           :pyro #{5 6}
+                           :demoman #{7 8}
+                           :heavy #{9 10}
+                           :engineer #{11 12}
+                           :medic #{13 14}
+                           :sniper #{15 16}
+                           :spy #{17 18}}))))
 
 (deftest ready-with-single-dupe-test
   (testing "Game is not ready when there are less than 18 players"
-    (is (not (ready? ["a" "b"] {:scout #{"a" "b"}
-                                :soldier #{"a" "d"}
-                                :pyro #{"e" "f"}
-                                :demoman #{"g" "h"}
-                                :heavy #{"i" "j"}
-                                :engineer #{"k" "l"}
-                                :medic #{"m" "n"}
-                                :sniper #{"o" "p"}
-                                :spy #{"q" "r"}})))))
+    (is (not (ready? [1 2] {:scout #{1 2}
+                                :soldier #{1 4}
+                                :pyro #{5 6}
+                                :demoman #{7 8}
+                                :heavy #{9 10}
+                                :engineer #{11 12}
+                                :medic #{13 14}
+                                :sniper #{15 16}
+                                :spy #{17 18}})))))
 
 (deftest ready-with-complex-dupe-test
   ;todo better name
   (testing "Game is not ready when a player is duped"
-    (is (not (ready? ["a" "b"] {:scout #{"a" "b"}
-                                :soldier #{"a" "d"}
-                                :pyro #{"e" "f"}
-                                :demoman #{"g" "h"}
-                                :heavy #{"i" "j"}
-                                :engineer #{"k" "l"}
-                                :medic #{"m" "n"}
-                                :sniper #{"o" "p"}
-                                :spy #{"q" "r" "s" "t"}})))))
+    (is (not (ready? [1 2] {:scout #{1 2}
+                                :soldier #{1 4}
+                                :pyro #{5 6}
+                                :demoman #{7 8}
+                                :heavy #{9 10}
+                                :engineer #{11 12}
+                                :medic #{13 14}
+                                :sniper #{15 16}
+                                :spy #{17 18 19 20}})))))
 
 (deftest ready-without-captains-test
   (testing "Game is not ready without 2 captains"
-    (is (not (ready? ["a"] {:scout #{"a" "b"}
-                            :soldier #{"c" "d"}
-                            :pyro #{"e" "f"}
-                            :demoman #{"g" "h"}
-                            :heavy #{"i" "j"}
-                            :engineer #{"k" "l"}
-                            :medic #{"m" "n"}
-                            :sniper #{"o" "p"}
-                            :spy #{"q" "r"}})))))
+    (is (not (ready? [1] {:scout #{1 2}
+                            :soldier #{3 4}
+                            :pyro #{5 6}
+                            :demoman #{7 8}
+                            :heavy #{9 10}
+                            :engineer #{11 12}
+                            :medic #{13 14}
+                            :sniper #{15 16}
+                            :spy #{17 18}})))))
 
 (deftest need-test
   (testing "Need returns list requirements unmet to be ready"
@@ -117,61 +117,61 @@
 
 (deftest need-ready-test
   (testing "Need returns an empty map if all requirements are met"
-    (is (= {} (need ["a" "b"] {:scout #{"a" "b"}
-                               :soldier #{"c" "d"}
-                               :pyro #{"e" "f"}
-                               :demoman #{"g" "h"}
-                               :heavy #{"i" "j"}
-                               :engineer #{"k" "l"}
-                               :medic #{"m" "n"}
-                               :sniper #{"o" "p"}
-                               :spy #{"q" "r"}})))))
+    (is (= {} (need [1 2] {:scout #{1 2}
+                               :soldier #{3 4}
+                               :pyro #{5 6}
+                               :demoman #{7 8}
+                               :heavy #{9 10}
+                               :engineer #{11 12}
+                               :medic #{13 14}
+                               :sniper #{15 16}
+                               :spy #{17 18}})))))
 
 (deftest need-with-dupes-test
   (testing "Need handles duplicates correctly"
-    (is (= {#{:scout :soldier} 1} (need ["a" "b"] {:scout #{"a" "b"}
-                                                   :soldier #{"a" "d"}
-                                                   :pyro #{"e" "f"}
-                                                   :demoman #{"g" "h"}
-                                                   :heavy #{"i" "j"}
-                                                   :engineer #{"k" "l"}
-                                                   :medic #{"m" "n"}
-                                                   :sniper #{"o" "p"}
-                                                   :spy #{"q" "r" "s" "t"}})))))
+    (is (= {#{:scout :soldier} 1} (need [1 2] {:scout #{1 2}
+                                                   :soldier #{1 4}
+                                                   :pyro #{5 6}
+                                                   :demoman #{7 8}
+                                                   :heavy #{9 10}
+                                                   :engineer #{11 12}
+                                                   :medic #{13 14}
+                                                   :sniper #{15 16}
+                                                   :spy #{17 18 19 20}})))))
 
 (deftest need-with-mulitple-dupes-test
   (testing "Need handles multiple duplicates correctly"
     (is (= {#{:scout :soldier} 1
-            #{:soldier :pyro} 1} (need ["a" "b"] {:scout #{"a" "b"}
-                                                  :soldier #{"a" "d"}
-                                                  :pyro #{"d" "f"}
-                                                  :demoman #{"g" "h"}
-                                                  :heavy #{"i" "j"}
-                                                  :engineer #{"k" "l"}
-                                                  :medic #{"m" "n"}
-                                                  :sniper #{"o" "p"}
-                                                  :spy #{"q" "r" "s" "t"}})))))
+            #{:soldier :pyro} 1} (need [1 2] {:scout #{1 2}
+                                                  :soldier #{1 4}
+                                                  :pyro #{4 6}
+                                                  :demoman #{7 8}
+                                                  :heavy #{9 10}
+                                                  :engineer #{11 12}
+                                                  :medic #{13 14}
+                                                  :sniper #{15 16}
+                                                  :spy #{17 18 19 20}})))))
 
 (deftest need-with-dupe-and-extra-player-test
   (testing "Need handles duplicates correctly"
-    (is (= {} (need ["a" "b"] {:scout #{"a" "b" "c"}
-                               :soldier #{"a" "d"}
-                               :pyro #{"e" "f"}
-                               :demoman #{"g" "h"}
-                               :heavy #{"i" "j"}
-                               :engineer #{"k" "l"}
-                               :medic #{"m" "n"}
-                               :sniper #{"o" "p"}
-                               :spy #{"q" "r" "s" "t"}})))))
+    (is (= {} (need [1 2] {:scout #{1 2 3}
+                               :soldier #{1 4}
+                               :pyro #{5 6}
+                               :demoman #{7 8}
+                               :heavy #{9 10}
+                               :engineer #{11 12}
+                               :medic #{13 14}
+                               :sniper #{15 16}
+                               :spy #{17 18 19 20}})))))
 
 (deftest need-with-optional-dupe-and-dupe-test
   (testing "Need handles multiple duplicates correctly"
-    (is (= {#{:soldier :pyro} 1} (need ["a" "b"] {:scout #{"a" "b" "c"}
-                                                  :soldier #{"a" "d"}
-                                                  :pyro #{"d" "f"}
-                                                  :demoman #{"g" "h"}
-                                                  :heavy #{"i" "j"}
-                                                  :engineer #{"k" "l"}
-                                                  :medic #{"m" "n"}
-                                                  :sniper #{"o" "p"}
-                                                  :spy #{"q" "r" "s" "t"}})))))
+    (is (= {#{:soldier :pyro} 1} (need [1 2] {:scout #{1 2 3}
+                                                  :soldier #{1 4}
+                                                  :pyro #{4 6}
+                                                  :demoman #{7 8}
+                                                  :heavy #{9 10}
+                                                  :engineer #{11 12}
+                                                  :medic #{13 14}
+                                                  :sniper #{15 16}
+                                                  :spy #{17 18 19 20}})))))
