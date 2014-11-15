@@ -7,50 +7,60 @@
 
 (deftest add-player-test
   (testing "Add a player to the pug"
-    (is (= {:scout #{user-id}} (add-player {} user-id #{:scout})))))
+    (is (= {:captains #{} :classes {:scout #{user-id}}} (add-player base-state user-id #{:scout})))))
 
 (deftest add-player-with-multiple-classes-test
   (testing "Add a player with more than one class to the pug"
-    (is (= {:scout #{user-id} :soldier #{user-id}}
-          (add-player {} user-id #{:scout :soldier})))))
+    (is (= {:captains #{} :classes {:scout #{user-id} :soldier #{user-id}}}
+          (add-player base-state user-id #{:scout :soldier})))))
 
 (deftest add-player-to-pug-with-bad-class-test
   (testing "Add a player with a bad class to the pug"
-    (is (thrown? AssertionError (add-player {} user-id #{:abcd})))))
+    (is (thrown? AssertionError (add-player base-state user-id #{:abcd})))))
 
 (deftest add-second-player-test
   (testing "Add a second player to the pug"
-    (is (= {:scout #{user-id} :soldier #{other-user-id}}
-          (add-player {:scout #{user-id}} other-user-id #{:soldier})))))
+    (is (= {:captains #{} :classes {:scout #{user-id} :soldier #{other-user-id}}}
+          (add-player {:captains #{} :classes {:scout #{user-id}}} other-user-id #{:soldier})))))
 
 (deftest add-player-twice-test
   (testing "Readding a player will clear their previous classes"
-    (is (= {:soldier #{user-id}}
-          (add-player {:scout #{user-id}} user-id #{:soldier})))))
+    (is (= {:captains #{} :classes {:soldier #{user-id}}}
+          (add-player {:captains #{} :classes {:scout #{user-id}}} user-id #{:soldier})))))
 
 (deftest remove-player-test
   (testing "Remove a player from the pug"
-    (is (= {}
-          (remove-player {:scout #{user-id}} user-id)))))
+    (is (= base-state
+          (remove-player {:classes {:scout #{user-id}} :captains #{}} user-id)))))
 
 (deftest remove-player-in-multiple-classes
   (testing "Remove a player added as multiple classes from the pug"
-    (is (= {}
-          (remove-player {:scout #{user-id} :soldier #{user-id}} user-id)))))
+    (is (= base-state
+          (remove-player {:classes {:scout #{user-id} :soldier #{user-id}} :captains #{}} user-id)))))
+
+(deftest remove-player-from-captains
+  (testing "Remove a player added as a captain"
+    (is (= base-state
+          (remove-player {:classes {:scout #{user-id}} :captains #{user-id}} user-id)))))
 
 (deftest remove-player-safe-test
   (testing "Remove a player from the pug doesn't affect other players"
-    (is (= {:scout #{other-user-id}}
-          (remove-player {:scout #{user-id other-user-id}} user-id)))))
+    (is (= {:classes {:scout #{other-user-id}} :captains #{}}
+          (remove-player {:classes {:scout #{user-id other-user-id}} :captains #{}} user-id)))))
 
 (deftest rename-player-test
   (testing "Rename a player in the pug"
-    (is (= {:scout #{other-user-id}}
-          (rename-player {:scout #{user-id}} user-id other-user-id)))))
+    (is (= {:classes {:scout #{other-user-id}} :captains #{}}
+          (rename-player {:classes {:scout #{user-id}} :captains #{}} user-id other-user-id)))))
+
+(deftest rename-player-captain-test
+  (testing "Rename a player who's a captain in the pug"
+    (is (= {:classes {:scout #{other-user-id}} :captains #{other-user-id}}
+          (rename-player {:classes {:scout #{user-id}} :captains #{user-id}} user-id other-user-id)))))
 
 (deftest rename-player-safe
   (testing "Renaming a non-existent player doesn't affect other players"
-    (let [state {:scout #{user-id}}]
+    (let [state {:classes {:scout #{user-id}} :captains #{user-id}}]
       (is (= state (rename-player state other-user-id "querty"))))))
 
 (deftest basic-ready-test
